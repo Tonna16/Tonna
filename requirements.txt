@@ -1,8 +1,8 @@
 streamlit
 matplotlib
+plotly
 pandas
 numpy
-plotly
 requests
 scikit-learn
 statsmodels

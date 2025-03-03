@@ -115,4 +115,4 @@ elif page == "Data Export":
     energy_usage = np.random.randint(100, 500, size=24)
     df_export = pd.DataFrame({"Time (Hours)": time, "Energy Consumption (kWh)": energy_usage})
     csv = df_export.to_csv(index=False).encode("utf-8")
-    st.download_button("Download CSV", csv, "energy_data.csv", "text/csv"
+    st.download_button("Download CSV", csv, "energy_data.csv", "text/csv")

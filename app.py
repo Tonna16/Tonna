@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import pandas as pd
 import requests
-from voice_commands import voice_commands_page
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from streamlit_autorefresh import st_autorefresh

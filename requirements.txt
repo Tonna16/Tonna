@@ -4,9 +4,6 @@ plotly
 pandas
 numpy
 scikit-learn
-openai
-speechrecognition
-pyttsx3
 googletrans==4.0.0rcl
 fpdf
 statsmodels

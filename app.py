@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import pandas as pd
 import requests
-
+from voice_commands import voice_commands_page
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from streamlit_autorefresh import st_autorefresh
@@ -446,3 +446,20 @@ elif page == "IoT Integration":
     fig_iot = px.bar(x=list(sensor_data.keys()), y=list(sensor_data.values()),
                      labels={"x": "Device", "y": "Power (W)"}, title="IoT Sensor Readings")
     st.plotly_chart(fig_iot)
+# Sidebar navigation
+st.sidebar.title("Navigation")
+page = st.sidebar.radio("Go to", ["Home", "Weather", "Predictions", "Voice Commands"])
+
+# Handle page selection
+if page == "Home":
+    st.title("Home")
+    st.write("Welcome to the app!")
+elif page == "Weather":
+    st.title("Weather")
+    st.write("Weather forecasting coming soon...")
+elif page == "Predictions":
+    st.title("Predictions")
+    st.write("Prediction model coming soon...")
+elif page == "Voice Commands":
+    voice_commands_page()  # Calls the function from voice_commands.py
+

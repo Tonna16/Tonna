@@ -4,8 +4,8 @@ plotly
 pandas
 numpy
 scikit-learn
-googletrans==4.0.0rcl
 fpdf
 statsmodels
 matplotlib
 streamlit-autorefresh
+openai

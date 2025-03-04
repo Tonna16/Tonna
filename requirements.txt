@@ -1,9 +1,11 @@
 streamlit
-matplotlib
+requests
 plotly
 pandas
 numpy
-requests
 scikit-learn
-statsmodels
-streamlit-autorefresh
+openai
+speechrecognition
+pyaudio
+pyttsx3
+googletrans==4.0.0-rcl

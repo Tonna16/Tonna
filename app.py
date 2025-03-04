@@ -8,16 +8,15 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from streamlit_autorefresh import st_autorefresh
 from fpdf import FPDF
-# Uncomment if using deep learning later
-# from tensorflow.keras.models import Sequential
-# from tensorflow.keras.layers import LSTM, Dense
+# If you add deep learning or AI chat later, import them here
+# import openai
 
 # ----------------------------
-# Auto-refresh every 60 seconds (simulate real-time updates)
-st_autorefresh(interval=60000, limit=100, key="energy_autorefresh")
-
-# Set page configuration
+# Must be the very first Streamlit command!
 st.set_page_config(page_title="Ultimate Energy Monitoring System", layout="wide")
+
+# Auto-refresh every 60 seconds to simulate real-time updates
+st_autorefresh(interval=60000, limit=100, key="energy_autorefresh")
 
 # ----------------------------
 # SESSION STATE DEFAULTS
@@ -35,7 +34,7 @@ if 'manual_data' not in st.session_state:
     st.session_state['manual_data'] = None
 
 # ----------------------------
-# TRANSLATIONS: All UI text is managed here
+# MULTI-LANGUAGE DICTIONARY (All UI text)
 translations = {
     "English": {
         "title": "Ultimate Energy Monitoring System",
@@ -62,7 +61,6 @@ translations = {
         "manual_input": "Manual Energy Data Input",
         "chat_assistant": "Chat Assistant",
         "iot_integration": "IoT Integration",
-        "voice_commands": "Voice Commands (Coming Soon)",
         "settings": "Settings",
         "settings_language": "Select Language",
         "settings_theme": "Select Theme",
@@ -100,7 +98,6 @@ translations = {
         "manual_input": "Entrada Manual de Datos de Energía",
         "chat_assistant": "Asistente de Chat",
         "iot_integration": "Integración IoT",
-        "voice_commands": "Comandos de Voz (Próximamente)",
         "settings": "Configuración",
         "settings_language": "Seleccione el idioma",
         "settings_theme": "Seleccione el tema",
@@ -119,7 +116,7 @@ def tr(key):
     return translations[st.session_state.language].get(key, key)
 
 # ----------------------------
-# CUSTOM CSS BASED ON THEME
+# Apply custom CSS based on theme
 if st.session_state.theme == "Dark":
     custom_css = """
     <style>
@@ -144,26 +141,23 @@ else:
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # ----------------------------
-# LOGIN SYSTEM: Simple demo (replace with secure auth in production)
+# SIMPLE LOGIN SYSTEM (Demo)
 def show_login():
     st.title(tr("login"))
     username = st.text_input(tr("username"))
     password = st.text_input(tr("password"), type="password")
     if st.button(tr("login_button")):
-        # Demo credentials (in production, verify against a database)
         if username == "admin" and password == "password":
             st.session_state.logged_in = True
             st.success("Logged in successfully!")
         else:
             st.error(tr("login_error"))
 
-# If not logged in, only allow access to Login and Settings pages.
 if not st.session_state.logged_in:
     page = st.sidebar.radio("Go to", ["Login", "Settings"])
     if page == "Login":
         show_login()
     elif page == "Settings":
-        # Show settings even if not logged in
         st.title(tr("settings"))
         lang = st.selectbox(tr("settings_language"), ["English", "Spanish"], index=["English", "Spanish"].index(st.session_state.language))
         st.session_state.language = lang
@@ -175,17 +169,18 @@ if not st.session_state.logged_in:
         st.write(f"{tr('settings_language')}: {st.session_state.language}")
         st.write(f"{tr('settings_theme')}: {st.session_state.theme}")
         st.write(f"{tr('settings_temp_unit')}: {st.session_state.temp_unit}")
-    st.stop()  # Prevent access to other pages until login
+    st.stop()
 
 # ----------------------------
-# SIDEBAR NAVIGATION: Only if logged in
+# SIDEBAR NAVIGATION (For logged-in users)
 st.sidebar.title("Navigation")
-all_pages = ["Custom Tracker", "Real-Time Weather", "Prediction", "Premium Recommendations", "Gamification & Optimization", "Data Export", "Manual Input", "Chat Assistant", "IoT Integration", "Voice Commands", "Settings", "Logout"]
+all_pages = ["Custom Tracker", "Real-Time Weather", "Prediction", "Premium Recommendations", 
+             "Gamification & Optimization", "Data Export", "Manual Input", "Chat Assistant", 
+             "IoT Integration", "Settings", "Logout"]
 selected_pages = st.sidebar.multiselect("Dashboard Pages", options=all_pages, default=all_pages)
 st.session_state.dashboard_pages = selected_pages
 page = st.sidebar.radio("Go to", st.session_state.dashboard_pages)
 
-# Logout function
 if page == "Logout":
     st.session_state.logged_in = False
     st.experimental_rerun()
@@ -231,7 +226,7 @@ if page == "Custom Tracker":
 elif page == "Real-Time Weather":
     st.title(tr("weather"))
     st.write("Enter a city name to get live weather data.")
-    default_api_key = "500c92f90ed8f4f84755b89b9e05e714"  # Replace with your API key
+    default_api_key = "YOUR_OPENWEATHER_API_KEY"  # Replace with your API key
     city_input = st.text_input(tr("weather_input"), "New York")
     def get_weather(city, api_key=default_api_key):
         base_url = "https://api.openweathermap.org/data/2.5/weather"
@@ -429,9 +424,8 @@ elif page == "Chat Assistant":
     st.write("Ask for personalized energy-saving tips!")
     question = st.text_input(tr("chat_prompt"), "")
     if st.button(tr("chat_button")) and question:
-        # Simulated chatbot response (replace with OpenAI API in production)
         simulated_response = "Tip: Consider upgrading to LED lighting and installing a smart thermostat to optimize energy usage."
-        st.write(simulated_response)
+        st.write("Response:", simulated_response)
 
 # ----------------------------
 # IOT INTEGRATION PAGE
@@ -445,20 +439,4 @@ elif page == "IoT Integration":
     fig_iot = px.bar(x=list(sensor_data.keys()), y=list(sensor_data.values()),
                      labels={"x": "Device", "y": "Power (W)"}, title="IoT Sensor Readings")
     st.plotly_chart(fig_iot)
-# Sidebar navigation
-st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Weather", "Predictions", "Voice Commands"])
-
-# Handle page selection
-if page == "Home":
-    st.title("Home")
-    st.write("Welcome to the app!")
-elif page == "Weather":
-    st.title("Weather")
-    st.write("Weather forecasting coming soon...")
-elif page == "Predictions":
-    st.title("Predictions")
-    st.write("Prediction model coming soon...")
-elif page == "Voice Commands":
-    voice_commands_page()  # Calls the function from voice_commands.py
 

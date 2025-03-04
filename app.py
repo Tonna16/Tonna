@@ -232,7 +232,7 @@ if page == "Custom Tracker":
 elif page == "Real-Time Weather":
     st.title(tr("weather"))
     st.write("Enter a city name to get live weather data.")
-    default_api_key = "YOUR_OPENWEATHER_API_KEY"  # Replace with your API key
+    default_api_key = "500c92f90ed8f4f84755b89b9e05e714"  # Replace with your API key
     city_input = st.text_input(tr("weather_input"), "New York")
     def get_weather(city, api_key=default_api_key):
         base_url = "https://api.openweathermap.org/data/2.5/weather"

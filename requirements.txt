@@ -7,4 +7,8 @@ scikit-learn
 openai
 speechrecognition
 pyttsx3
-googletrans==4.0.0-rcl
+googletrans==4.0.0rcl
+fpdf
+statsmodels
+matplotlib
+streamlit-autorefresh

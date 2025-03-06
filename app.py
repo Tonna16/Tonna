@@ -44,13 +44,13 @@ if 'manual_data' not in st.session_state:
 # -------------------------------------------------
 # Firebase Configuration (replace placeholders with your actual Firebase settings)
 firebaseConfig = {
-    "apiKey": "YOUR_FIREBASE_API_KEY",
+    "apiKey":"\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDPs0petOO0Ooj2\nWVIojyX10F+mhugerUL29JyV/KvmT4dOw6jYGph/2JroycH3Ys6xuOzmqgxoNRHC\niUjPk6xlKQ5GxyPIrSzr3QwT1HqiRwClJS1XnmZuYIBitwHFZsJrhZAJIGmQ/Xvr\nH0qXfZxBloq8U60TLZ46pNFrDI+2mPWMaYtOEoWBhpSmEPP4Bx0lBg/JNgaLbRgi\n1JcJIQNpSywy9w0/BcoafmuoILdO3ZGirTs0h5ygjnGifuWsPuyyjeSSXAWQeO3D\n44Cz6Z3r2MLbcs3KMF3veyonrPI50GsH3Mo35c4yEi7vcaGNUc2AnILJ1R8/T43b\n/1NcvdtnAgMBAAECggEADXMRT5asR0E75m/pEQ7lj2H7f6YTi9qX9oC0G9/gjCmX\naNmxdxgpyqv1ENPxYOdsddFN9EkL3dRp62X5nNXcMpf5AH5Otxgq5RvlEOrc0hTo\nJsmEgryTUQ+j4Kbz6pt5eLFaa8Z5Ve+dwZ9YgWM1GU4tR7EUPD5JyIeTUNJGA09z\nrTALe0xkGtgTKIts2ajNXociDJ2+FUFJy4TfNfAKo4R3cB2QCu3rO8UTJ3WUKspW\nMpFpoUva6HfvbwSrWBK9XGlL+YqtxPVvf250rtSwKRFO07gKg7FHX8ioW3q5yEZo\n1tO9nLhoIgoHeOSeSZxjNJ7T7a4WdlGUSb20h7fm+QKBgQDrWTkS68jifKbXO/U2\na9wB8xLXL25QfnL49tZ7ijIoIYCDm5YdKJJ3Mek9M2OVwl7iFBkyxOwFWQyLYj9v\ny1zbtBx7A6YFvS/WgS+AcRsAcJHx1eNlUEoDBWiFblHXHEYbkAqDcvTte/DaC67g\nOVp7AA7TfF6V4fSjy86zaP9g1QKBgQDh7P1leFA2Oto8/0CuxnlFfGgweOFayB0b\nM78Dc0yvUb0WqIXC/xuRWY/OIsBc32KHD8cv7djkJdtBlU9BYGOv4FmrgCVKAjd8\nMIAXimBbVWz4pwqicFU8xear26mq0Uexzgx5VzYytlA+jPZPA3ptjPdKMbm0OuJH\nhVmqG/EJSwKBgQCKCoNXfcUOU17oz9o8WXdqDVD3tnJV9FUrgly7iYtxznS6vP+H\nisyd7UCJDSNUK/XLVU6SYL6vRFP/TVk4EWgd1b7+yF0Q8K6meo+KHs1frKdt2a7P\nNhCzRPDRkqueKI9Wi14fS8YtpYzX2BJyojFYA+iuUzyHXUlI6boLsYJZIQKBgQDX\nzQ+eRPYZVs3vRcH7MAnWnabH5i8cD9n9icgC+7dcH6+GXSKnyBYFGI+MTxV/oMD0\nUdXpqj9qbd6pHn297NxLuvjsIFN+BfAJ6CnyUnMHyulz+drmnnZMvpw/vGqsh4r8\nA91Waj+S4SJ1HSCJCMGAsw3jCOxhg31w46dqHZZ3UQKBgGwAc8uIqb+1HNwiBDgi\nfqg5oJ/FGHt5/RL/L+4N/KPcRpU8yLWzOagJNkCGjyLWYVKW9By1p+D/F5uq65dl\nERaMLGEFkl/u/FG7wmSf1ZinrcJhmqNJrpephjzzzedJ167ym814N1uran1VXX/a\nev/hARxTnqEiGXdVRcKvQz1P\n",
     "authDomain": "tonna-adc81.firebaseapp.com",
     "databaseURL": "https://tonna-adc81-default-rtdb.firebaseio.com/",
     "projectId": "tonna-adc81",
     "storageBucket": "tonna-adc81.appspot.com",
-    "messagingSenderId": "YOUR_MESSAGING_SENDER_ID",
-    "appId": "YOUR_APP_ID"
+    "messagingSenderId": "22690244101",
+    "appId": "1:22690244101:ios:90f929af56bae4bcb91e6c"
 }
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()

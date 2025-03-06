@@ -12,3 +12,8 @@ openai
 pyrebase
 streamlit-lottie
 python-dotenv
+sseclient
+oauth2client.service_account
+gcloud
+oauth2client
+Crypto.PublicKey

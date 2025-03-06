@@ -1,12 +1,14 @@
 streamlit
-requests
+matplotlib
 plotly
 pandas
 numpy
+requests
 scikit-learn
-fpdf
 statsmodels
-matplotlib
 streamlit-autorefresh
+fpdf
 openai
+pyrebase
+streamlit-lottie
 python-dotenv

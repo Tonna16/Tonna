@@ -8,20 +8,25 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from streamlit_autorefresh import st_autorefresh
 from fpdf import FPDF
-# If you add deep learning or AI chat later, import them here
-# import openai
+import pyrebase  # For Firebase authentication
+import openai    # For Chat Assistant
+from streamlit_lottie import st_lottie  # For animations
+import os
 
-# ----------------------------
-# Must be the very first Streamlit command!
+# -------------------------------------------------
+# MUST BE THE FIRST STREAMLIT COMMAND
 st.set_page_config(page_title="Ultimate Energy Monitoring System", layout="wide")
 
+# -------------------------------------------------
 # Auto-refresh every 60 seconds to simulate real-time updates
 st_autorefresh(interval=60000, limit=100, key="energy_autorefresh")
 
-# ----------------------------
+# -------------------------------------------------
 # SESSION STATE DEFAULTS
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
+if 'user' not in st.session_state:
+    st.session_state.user = None
 if 'language' not in st.session_state:
     st.session_state.language = "English"
 if 'theme' not in st.session_state:
@@ -29,20 +34,36 @@ if 'theme' not in st.session_state:
 if 'temp_unit' not in st.session_state:
     st.session_state.temp_unit = "Celsius"
 if 'streak' not in st.session_state:
-    st.session_state['streak'] = 0
+    st.session_state.streak = 0
 if 'manual_data' not in st.session_state:
-    st.session_state['manual_data'] = None
+    st.session_state.manual_data = None
 
-# ----------------------------
-# MULTI-LANGUAGE DICTIONARY (All UI text)
+# -------------------------------------------------
+# Firebase Configuration (replace placeholders with your actual Firebase settings)
+firebaseConfig = {
+    "apiKey": "\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDPs0petOO0Ooj2\nWVIojyX10F+mhugerUL29JyV/KvmT4dOw6jYGph/2JroycH3Ys6xuOzmqgxoNRHC\niUjPk6xlKQ5GxyPIrSzr3QwT1HqiRwClJS1XnmZuYIBitwHFZsJrhZAJIGmQ/Xvr\nH0qXfZxBloq8U60TLZ46pNFrDI+2mPWMaYtOEoWBhpSmEPP4Bx0lBg/JNgaLbRgi\n1JcJIQNpSywy9w0/BcoafmuoILdO3ZGirTs0h5ygjnGifuWsPuyyjeSSXAWQeO3D\n44Cz6Z3r2MLbcs3KMF3veyonrPI50GsH3Mo35c4yEi7vcaGNUc2AnILJ1R8/T43b\n/1NcvdtnAgMBAAECggEADXMRT5asR0E75m/pEQ7lj2H7f6YTi9qX9oC0G9/gjCmX\naNmxdxgpyqv1ENPxYOdsddFN9EkL3dRp62X5nNXcMpf5AH5Otxgq5RvlEOrc0hTo\nJsmEgryTUQ+j4Kbz6pt5eLFaa8Z5Ve+dwZ9YgWM1GU4tR7EUPD5JyIeTUNJGA09z\nrTALe0xkGtgTKIts2ajNXociDJ2+FUFJy4TfNfAKo4R3cB2QCu3rO8UTJ3WUKspW\nMpFpoUva6HfvbwSrWBK9XGlL+YqtxPVvf250rtSwKRFO07gKg7FHX8ioW3q5yEZo\n1tO9nLhoIgoHeOSeSZxjNJ7T7a4WdlGUSb20h7fm+QKBgQDrWTkS68jifKbXO/U2\na9wB8xLXL25QfnL49tZ7ijIoIYCDm5YdKJJ3Mek9M2OVwl7iFBkyxOwFWQyLYj9v\ny1zbtBx7A6YFvS/WgS+AcRsAcJHx1eNlUEoDBWiFblHXHEYbkAqDcvTte/DaC67g\nOVp7AA7TfF6V4fSjy86zaP9g1QKBgQDh7P1leFA2Oto8/0CuxnlFfGgweOFayB0b\nM78Dc0yvUb0WqIXC/xuRWY/OIsBc32KHD8cv7djkJdtBlU9BYGOv4FmrgCVKAjd8\nMIAXimBbVWz4pwqicFU8xear26mq0Uexzgx5VzYytlA+jPZPA3ptjPdKMbm0OuJH\nhVmqG/EJSwKBgQCKCoNXfcUOU17oz9o8WXdqDVD3tnJV9FUrgly7iYtxznS6vP+H\nisyd7UCJDSNUK/XLVU6SYL6vRFP/TVk4EWgd1b7+yF0Q8K6meo+KHs1frKdt2a7P\nNhCzRPDRkqueKI9Wi14fS8YtpYzX2BJyojFYA+iuUzyHXUlI6boLsYJZIQKBgQDX\nzQ+eRPYZVs3vRcH7MAnWnabH5i8cD9n9icgC+7dcH6+GXSKnyBYFGI+MTxV/oMD0\nUdXpqj9qbd6pHn297NxLuvjsIFN+BfAJ6CnyUnMHyulz+drmnnZMvpw/vGqsh4r8\nA91Waj+S4SJ1HSCJCMGAsw3jCOxhg31w46dqHZZ3UQKBgGwAc8uIqb+1HNwiBDgi\nfqg5oJ/FGHt5/RL/L+4N/KPcRpU8yLWzOagJNkCGjyLWYVKW9By1p+D/F5uq65dl\nERaMLGEFkl/u/FG7wmSf1ZinrcJhmqNJrpephjzzzedJ167ym814N1uran1VXX/a\nev/hARxTnqEiGXdVRcKvQz1P\n",
+    "authDomain": "tonna-adc81.firebaseapp.com",
+    "databaseURL": "https://tonna-adc81-default-rtdb.firebaseio.com/",
+    "projectId": "tonna-adc81T",
+    "storageBucket": "tonna-adc81.appspot.com",
+    "messagingSenderId": "22690244101",
+    "appId": "1:22690244101:ios:90f929af56bae4bcb91e6c
+"
+}
+firebase = pyrebase.initialize_app(firebaseConfig)
+auth = firebase.auth()
+
+# -------------------------------------------------
+# Multi-language Dictionary (All UI text)
 translations = {
     "English": {
         "title": "Ultimate Energy Monitoring System",
-        "login": "Login",
-        "username": "Username",
+        "home_welcome": "Welcome to the Energy Monitoring Dashboard!",
+        "login": "Register",
+        "username": "Email",
         "password": "Password",
-        "login_button": "Log In",
-        "login_error": "Incorrect username or password.",
+        "register_button": "Register",
+        "registration_error": "Registration failed. Please try again.",
         "logout": "Log Out",
         "custom_tracker": "Custom Energy Consumption Tracker",
         "weather": "Real-Time Weather Data",
@@ -60,14 +81,13 @@ translations = {
         "data_export": "Download Energy Data",
         "manual_input": "Manual Energy Data Input",
         "chat_assistant": "Chat Assistant",
-        "iot_integration": "IoT Integration",
         "settings": "Settings",
         "settings_language": "Select Language",
         "settings_theme": "Select Theme",
         "settings_temp_unit": "Select Temperature Unit",
         "settings_dashboard": "Select Dashboard Pages to Show",
         "challenge_success": "Congratulations! You met today's energy savings challenge!",
-        "challenge_failure": "You did not meet the challenge today. Try to improve tomorrow!",
+        "challenge_failure": "You did not meet today's challenge. Try again tomorrow!",
         "streak": "Current Challenge Streak",
         "leaderboard": "Community Leaderboard",
         "chat_prompt": "Ask for an energy-saving tip:",
@@ -75,11 +95,12 @@ translations = {
     },
     "Spanish": {
         "title": "Sistema de Monitoreo de Energía Definitivo",
-        "login": "Iniciar Sesión",
-        "username": "Nombre de Usuario",
+        "home_welcome": "¡Bienvenido al Panel de Monitoreo de Energía!",
+        "login": "Registrarse",
+        "username": "Correo Electrónico",
         "password": "Contraseña",
-        "login_button": "Acceder",
-        "login_error": "Usuario o contraseña incorrectos.",
+        "register_button": "Registrar",
+        "registration_error": "Error en el registro. Por favor, inténtelo de nuevo.",
         "logout": "Cerrar Sesión",
         "custom_tracker": "Rastreador de Consumo de Energía Personalizado",
         "weather": "Datos Meteorológicos en Tiempo Real",
@@ -97,7 +118,6 @@ translations = {
         "data_export": "Descargar Datos de Energía",
         "manual_input": "Entrada Manual de Datos de Energía",
         "chat_assistant": "Asistente de Chat",
-        "iot_integration": "Integración IoT",
         "settings": "Configuración",
         "settings_language": "Seleccione el idioma",
         "settings_theme": "Seleccione el tema",
@@ -115,8 +135,8 @@ translations = {
 def tr(key):
     return translations[st.session_state.language].get(key, key)
 
-# ----------------------------
-# Apply custom CSS based on theme
+# -------------------------------------------------
+# Apply Custom CSS Based on Theme
 if st.session_state.theme == "Dark":
     custom_css = """
     <style>
@@ -140,23 +160,37 @@ else:
     """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# ----------------------------
-# SIMPLE LOGIN SYSTEM (Demo)
-def show_login():
-    st.title(tr("login"))
-    username = st.text_input(tr("username"))
-    password = st.text_input(tr("password"), type="password")
-    if st.button(tr("login_button")):
-        if username == "admin" and password == "password":
-            st.session_state.logged_in = True
-            st.success("Logged in successfully!")
-        else:
-            st.error(tr("login_error"))
+# -------------------------------------------------
+# HOME PAGE: Display a Welcome Animation
+def show_home():
+    st.title(tr("title"))
+    st.write(tr("home_welcome"))
+    # Load and display a Lottie animation
+    lottie_url = "https://assets7.lottiefiles.com/packages/lf20_jcikwtux.json"  # Example animation URL
+    st_lottie(lottie_url, height=300)
 
+# -------------------------------------------------
+# USER AUTHENTICATION: Registration Only
+def show_registration():
+    st.title(tr("login"))
+    st.write("Please register to create an account.")
+    email = st.text_input(tr("username"), key="reg_email")
+    password = st.text_input(tr("password"), type="password", key="reg_password")
+    if st.button(tr("register_button"), key="register_button"):
+        try:
+            user = auth.create_user_with_email_and_password(email, password)
+            st.session_state.logged_in = True
+            st.session_state.user = user
+            st.success("Registration successful! You are now logged in.")
+        except Exception as e:
+            st.error(tr("registration_error"))
+
+# -------------------------------------------------
+# If the user is not registered, show the registration form
 if not st.session_state.logged_in:
-    page = st.sidebar.radio("Go to", ["Login", "Settings"])
-    if page == "Login":
-        show_login()
+    page = st.sidebar.radio("Go to", ["Register", "Settings"])
+    if page == "Register":
+        show_registration()
     elif page == "Settings":
         st.title(tr("settings"))
         lang = st.selectbox(tr("settings_language"), ["English", "Spanish"], index=["English", "Spanish"].index(st.session_state.language))
@@ -166,17 +200,13 @@ if not st.session_state.logged_in:
         temp_unit = st.selectbox(tr("settings_temp_unit"), ["Celsius", "Fahrenheit"], index=["Celsius", "Fahrenheit"].index(st.session_state.temp_unit))
         st.session_state.temp_unit = temp_unit
         st.write("Settings updated!")
-        st.write(f"{tr('settings_language')}: {st.session_state.language}")
-        st.write(f"{tr('settings_theme')}: {st.session_state.theme}")
-        st.write(f"{tr('settings_temp_unit')}: {st.session_state.temp_unit}")
     st.stop()
 
-# ----------------------------
-# SIDEBAR NAVIGATION (For logged-in users)
+# -------------------------------------------------
+# SIDEBAR NAVIGATION (For Logged-In Users)
 st.sidebar.title("Navigation")
-all_pages = ["Custom Tracker", "Real-Time Weather", "Prediction", "Premium Recommendations", 
-             "Gamification & Optimization", "Data Export", "Manual Input", "Chat Assistant", 
-             "IoT Integration", "Settings", "Logout"]
+all_pages = ["Home", "Custom Tracker", "Real-Time Weather", "Prediction", "Premium Recommendations", 
+             "Gamification & Optimization", "Data Export", "Manual Input", "Chat Assistant", "Settings", "Logout"]
 selected_pages = st.sidebar.multiselect("Dashboard Pages", options=all_pages, default=all_pages)
 st.session_state.dashboard_pages = selected_pages
 page = st.sidebar.radio("Go to", st.session_state.dashboard_pages)
@@ -185,9 +215,14 @@ if page == "Logout":
     st.session_state.logged_in = False
     st.experimental_rerun()
 
-# ----------------------------
-# CUSTOM TRACKER PAGE
-if page == "Custom Tracker":
+# -------------------------------------------------
+# PAGE: Home
+if page == "Home":
+    show_home()
+
+# -------------------------------------------------
+# PAGE: Custom Tracker
+elif page == "Custom Tracker":
     st.title(tr("custom_tracker"))
     st.write("Select your appliances, enter daily usage, and calculate your energy consumption and cost.")
     appliance_data = {
@@ -221,8 +256,8 @@ if page == "Custom Tracker":
     fig_breakdown = px.bar(df_breakdown, x="Appliance", y="Energy (kWh)", title="Energy Consumption per Appliance")
     st.plotly_chart(fig_breakdown)
 
-# ----------------------------
-# REAL-TIME WEATHER PAGE
+# -------------------------------------------------
+# PAGE: Real-Time Weather
 elif page == "Real-Time Weather":
     st.title(tr("weather"))
     st.write("Enter a city name to get live weather data.")
@@ -263,8 +298,8 @@ elif page == "Real-Time Weather":
             st.write(f"{tr('weather_humidity')}: {weather_data['Humidity']}")
             st.write(f"{tr('weather_wind')}: {weather_data['Wind Speed']}")
 
-# ----------------------------
-# PREDICTION PAGE
+# -------------------------------------------------
+# PAGE: Prediction
 elif page == "Prediction":
     st.title(tr("prediction"))
     st.write("Predict future energy consumption using advanced machine learning.")
@@ -300,6 +335,7 @@ elif page == "Prediction":
     ]).reshape(1, -1)
     predicted_usage = model.predict(future_features)
     st.write(f"Predicted Energy Consumption at Hour {future_hour}: {predicted_usage[0]:.2f} kWh")
+    st.info("Note: This prediction is based on simulated data. For personalized results, please upload your historical energy data in the Manual Input page.")
     future_hours = np.arange(24, 49)
     future_features_all = np.column_stack((
         future_hours,
@@ -312,8 +348,8 @@ elif page == "Prediction":
                        title=f"{model_choice} - Predicted Future Energy Consumption", markers=True)
     st.plotly_chart(fig_pred)
 
-# ----------------------------
-# PREMIUM RECOMMENDATIONS PAGE
+# -------------------------------------------------
+# PAGE: Premium Recommendations
 elif page == "Premium Recommendations":
     st.title(tr("premium"))
     st.write("Unlock insights to reduce energy consumption and save money!")
@@ -336,8 +372,8 @@ elif page == "Premium Recommendations":
                           title="Your Daily Energy Consumption Trend")
     st.plotly_chart(fig_premium)
 
-# ----------------------------
-# GAMIFICATION & OPTIMIZATION PAGE
+# -------------------------------------------------
+# PAGE: Gamification & Optimization
 elif page == "Gamification & Optimization":
     st.title(tr("gamification"))
     st.write("Engage in daily challenges and receive personalized energy-saving suggestions!")
@@ -352,15 +388,15 @@ elif page == "Gamification & Optimization":
     st.write(f"Your target consumption for today: {target_consumption:.2f} kWh (Baseline: {baseline} kWh)")
     if total_consumption <= target_consumption:
         st.success(tr("challenge_success"))
-        st.session_state['streak'] += 1
+        st.session_state.streak += 1
     else:
         st.error(tr("challenge_failure"))
-        st.session_state['streak'] = 0
-    st.write(f"**{tr('streak')}:** {st.session_state.get('streak', 0)} days")
+        st.session_state.streak = 0
+    st.write(f"**{tr('streak')}:** {st.session_state.streak} days")
     st.subheader(tr("leaderboard"))
     leaderboard = pd.DataFrame({
         "User": ["Alice", "Bob", "Charlie", "You", "Diana"],
-        "Streak (days)": [5, 3, 7, st.session_state.get('streak', 0), 4],
+        "Streak (days)": [5, 3, 7, st.session_state.streak, 4],
         "Savings Achieved (%)": [15, 10, 20, target_reduction, 12]
     })
     st.table(leaderboard.sort_values(by="Streak (days)", ascending=False))
@@ -377,8 +413,8 @@ elif page == "Gamification & Optimization":
     for s in suggestions:
         st.write(f"- {s}")
 
-# ----------------------------
-# DATA EXPORT PAGE
+# -------------------------------------------------
+# PAGE: Data Export
 elif page == "Data Export":
     st.title(tr("data_export"))
     st.write("Download your simulated energy consumption data.")
@@ -398,8 +434,8 @@ elif page == "Data Export":
         pdf.output(report_filename)
         st.write(f"Download your report: [Energy Report]({report_filename})")
 
-# ----------------------------
-# MANUAL INPUT PAGE
+# -------------------------------------------------
+# PAGE: Manual Input
 elif page == "Manual Input":
     st.title(tr("manual_input"))
     st.write("Enter your own energy consumption data (comma-separated) for analysis.")
@@ -417,26 +453,42 @@ elif page == "Manual Input":
     except Exception as e:
         st.error("Invalid input. Please enter numbers separated by commas.")
 
-# ----------------------------
-# CHAT ASSISTANT PAGE
+# -------------------------------------------------
+# PAGE: Chat Assistant
 elif page == "Chat Assistant":
     st.title(tr("chat_assistant"))
     st.write("Ask for personalized energy-saving tips!")
     question = st.text_input(tr("chat_prompt"), "")
     if st.button(tr("chat_button")) and question:
-        simulated_response = "Tip: Consider upgrading to LED lighting and installing a smart thermostat to optimize energy usage."
-        st.write("Response:", simulated_response)
+        openai.api_key = os.getenv("OPENAI_API_KEY")  # Ensure your .env file contains OPENAI_API_KEY
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "You are an energy-saving expert."},
+                    {"role": "user", "content": question}
+                ]
+            )
+            answer = response["choices"][0]["message"]["content"]
+        except Exception as e:
+            answer = "Error communicating with the AI service."
+        st.write("Response:", answer)
 
-# ----------------------------
-# IOT INTEGRATION PAGE
-elif page == "IoT Integration":
-    st.title(tr("iot_integration"))
-    st.write("Simulated IoT Sensor Data")
-    devices = ["Smart Plug 1", "Smart Plug 2", "Smart Thermostat"]
-    sensor_data = {device: np.random.randint(50, 500) for device in devices}
-    st.write("Current Sensor Readings (Watts):")
-    st.table(pd.DataFrame(list(sensor_data.items()), columns=["Device", "Power (W)"]))
-    fig_iot = px.bar(x=list(sensor_data.keys()), y=list(sensor_data.values()),
-                     labels={"x": "Device", "y": "Power (W)"}, title="IoT Sensor Readings")
-    st.plotly_chart(fig_iot)
+# -------------------------------------------------
+# PAGE: Settings
+elif page == "Settings":
+    st.title(tr("settings"))
+    lang = st.selectbox(tr("settings_language"), ["English", "Spanish"], index=["English", "Spanish"].index(st.session_state.language))
+    st.session_state.language = lang
+    theme = st.selectbox(tr("settings_theme"), ["Light", "Dark", "Blue"], index=["Light", "Dark", "Blue"].index(st.session_state.theme))
+    st.session_state.theme = theme
+    temp_unit = st.selectbox(tr("settings_temp_unit"), ["Celsius", "Fahrenheit"], index=["Celsius", "Fahrenheit"].index(st.session_state.temp_unit))
+    st.session_state.temp_unit = temp_unit
+    dashboard = st.multiselect(tr("settings_dashboard"), options=all_pages, default=st.session_state.dashboard_pages)
+    st.session_state.dashboard_pages = dashboard
+    st.write("Settings updated!")
+    st.write(f"{tr('settings_language')}: {st.session_state.language}")
+    st.write(f"{tr('settings_theme')}: {st.session_state.theme}")
+    st.write(f"{tr('settings_temp_unit')}: {st.session_state.temp_unit}")
+
 

@@ -8,6 +8,10 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from streamlit_autorefresh import st_autorefresh
 from fpdf import FPDF
+from dotenv import load_dotenv
+import os
+load_dotenv()
+open.api_key = os.getenv("OPENAI_API_KEY")
 import pyrebase  # For Firebase authentication
 import openai    # For Chat Assistant
 from streamlit_lottie import st_lottie  # For animations

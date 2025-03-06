@@ -9,3 +9,4 @@ statsmodels
 matplotlib
 streamlit-autorefresh
 openai
+python-dotenv

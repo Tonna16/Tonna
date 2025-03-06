@@ -47,8 +47,7 @@ firebaseConfig = {
     "projectId": "tonna-adc81T",
     "storageBucket": "tonna-adc81.appspot.com",
     "messagingSenderId": "22690244101",
-    "appId": "1:22690244101:ios:90f929af56bae4bcb91e6c
-"
+    "appId": "1:22690244101:ios:90f929af56bae4bcb91e6c"
 }
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()

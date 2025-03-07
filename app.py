@@ -48,7 +48,7 @@ if 'stored_password' not in st.session_state:
 # -------------------------------------------------
 # Firebase-Admin Initialization
 # Make sure your serviceAccountKey.json is in your project folder
-cred = credentials.Certificate("serviceAccountKey.json")
+cred = credentials.Certificate("tonna-adc81-firebase-adminsdk-fbsvc-154f2bf4cb.json")
 firebase_admin.initialize_app(cred)
 
 # -------------------------------------------------

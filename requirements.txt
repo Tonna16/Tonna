@@ -9,10 +9,7 @@ statsmodels
 streamlit-autorefresh
 fpdf
 openai
-pyrebase
 streamlit-lottie
 python-dotenv
-sseclient
-gcloud
-oauth2client
+firebase-admin
 

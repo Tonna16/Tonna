@@ -8,8 +8,10 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from streamlit_autorefresh import st_autorefresh
 from fpdf import FPDF
-import pyrebase  # For Firebase authentication
-from streamlit_lottie import st_lottie  # For animations
+import firebase_admin
+from firebase_admin import credentials, auth
+import openai
+from streamlit_lottie import st_lottie
 import os
 from dotenv import load_dotenv
 
@@ -21,7 +23,7 @@ st.set_page_config(page_title="Ultimate Energy Monitoring System", layout="wide"
 load_dotenv()
 
 # -------------------------------------------------
-# Auto-refresh every 60 seconds to simulate real-time updates
+# Auto-refresh every 60 seconds (simulate real-time updates)
 st_autorefresh(interval=60000, limit=100, key="energy_autorefresh")
 
 # -------------------------------------------------
@@ -40,20 +42,14 @@ if 'streak' not in st.session_state:
     st.session_state.streak = 0
 if 'manual_data' not in st.session_state:
     st.session_state.manual_data = None
+if 'stored_password' not in st.session_state:
+    st.session_state.stored_password = None
 
 # -------------------------------------------------
-# Firebase Configuration (replace placeholders with your actual Firebase settings)
-firebaseConfig = {
-    "apiKey":"\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDPs0petOO0Ooj2\nWVIojyX10F+mhugerUL29JyV/KvmT4dOw6jYGph/2JroycH3Ys6xuOzmqgxoNRHC\niUjPk6xlKQ5GxyPIrSzr3QwT1HqiRwClJS1XnmZuYIBitwHFZsJrhZAJIGmQ/Xvr\nH0qXfZxBloq8U60TLZ46pNFrDI+2mPWMaYtOEoWBhpSmEPP4Bx0lBg/JNgaLbRgi\n1JcJIQNpSywy9w0/BcoafmuoILdO3ZGirTs0h5ygjnGifuWsPuyyjeSSXAWQeO3D\n44Cz6Z3r2MLbcs3KMF3veyonrPI50GsH3Mo35c4yEi7vcaGNUc2AnILJ1R8/T43b\n/1NcvdtnAgMBAAECggEADXMRT5asR0E75m/pEQ7lj2H7f6YTi9qX9oC0G9/gjCmX\naNmxdxgpyqv1ENPxYOdsddFN9EkL3dRp62X5nNXcMpf5AH5Otxgq5RvlEOrc0hTo\nJsmEgryTUQ+j4Kbz6pt5eLFaa8Z5Ve+dwZ9YgWM1GU4tR7EUPD5JyIeTUNJGA09z\nrTALe0xkGtgTKIts2ajNXociDJ2+FUFJy4TfNfAKo4R3cB2QCu3rO8UTJ3WUKspW\nMpFpoUva6HfvbwSrWBK9XGlL+YqtxPVvf250rtSwKRFO07gKg7FHX8ioW3q5yEZo\n1tO9nLhoIgoHeOSeSZxjNJ7T7a4WdlGUSb20h7fm+QKBgQDrWTkS68jifKbXO/U2\na9wB8xLXL25QfnL49tZ7ijIoIYCDm5YdKJJ3Mek9M2OVwl7iFBkyxOwFWQyLYj9v\ny1zbtBx7A6YFvS/WgS+AcRsAcJHx1eNlUEoDBWiFblHXHEYbkAqDcvTte/DaC67g\nOVp7AA7TfF6V4fSjy86zaP9g1QKBgQDh7P1leFA2Oto8/0CuxnlFfGgweOFayB0b\nM78Dc0yvUb0WqIXC/xuRWY/OIsBc32KHD8cv7djkJdtBlU9BYGOv4FmrgCVKAjd8\nMIAXimBbVWz4pwqicFU8xear26mq0Uexzgx5VzYytlA+jPZPA3ptjPdKMbm0OuJH\nhVmqG/EJSwKBgQCKCoNXfcUOU17oz9o8WXdqDVD3tnJV9FUrgly7iYtxznS6vP+H\nisyd7UCJDSNUK/XLVU6SYL6vRFP/TVk4EWgd1b7+yF0Q8K6meo+KHs1frKdt2a7P\nNhCzRPDRkqueKI9Wi14fS8YtpYzX2BJyojFYA+iuUzyHXUlI6boLsYJZIQKBgQDX\nzQ+eRPYZVs3vRcH7MAnWnabH5i8cD9n9icgC+7dcH6+GXSKnyBYFGI+MTxV/oMD0\nUdXpqj9qbd6pHn297NxLuvjsIFN+BfAJ6CnyUnMHyulz+drmnnZMvpw/vGqsh4r8\nA91Waj+S4SJ1HSCJCMGAsw3jCOxhg31w46dqHZZ3UQKBgGwAc8uIqb+1HNwiBDgi\nfqg5oJ/FGHt5/RL/L+4N/KPcRpU8yLWzOagJNkCGjyLWYVKW9By1p+D/F5uq65dl\nERaMLGEFkl/u/FG7wmSf1ZinrcJhmqNJrpephjzzzedJ167ym814N1uran1VXX/a\nev/hARxTnqEiGXdVRcKvQz1P\n",
-    "authDomain": "tonna-adc81.firebaseapp.com",
-    "databaseURL": "https://tonna-adc81-default-rtdb.firebaseio.com/",
-    "projectId": "tonna-adc81",
-    "storageBucket": "tonna-adc81.appspot.com",
-    "messagingSenderId": "22690244101",
-    "appId": "1:22690244101:ios:90f929af56bae4bcb91e6c"
-}
-firebase = pyrebase.initialize_app(firebaseConfig)
-auth = firebase.auth()
+# Firebase-Admin Initialization
+# Make sure your serviceAccountKey.json is in your project folder
+cred = credentials.Certificate("serviceAccountKey.json")
+firebase_admin.initialize_app(cred)
 
 # -------------------------------------------------
 # MULTI-LANGUAGE DICTIONARY (All UI text)
@@ -61,11 +57,13 @@ translations = {
     "English": {
         "title": "Ultimate Energy Monitoring System",
         "home_welcome": "Welcome to the Energy Monitoring Dashboard!",
-        "login": "Register",
+        "login": "Login / Register",
         "username": "Email",
         "password": "Password",
+        "login_button": "Log In",
         "register_button": "Register",
         "registration_error": "Registration failed. Please try again.",
+        "login_error": "Invalid credentials.",
         "logout": "Log Out",
         "custom_tracker": "Custom Energy Consumption Tracker",
         "weather": "Real-Time Weather Data",
@@ -98,11 +96,13 @@ translations = {
     "Spanish": {
         "title": "Sistema de Monitoreo de Energía Definitivo",
         "home_welcome": "¡Bienvenido al Panel de Monitoreo de Energía!",
-        "login": "Registrarse",
+        "login": "Iniciar Sesión / Registrarse",
         "username": "Correo Electrónico",
         "password": "Contraseña",
+        "login_button": "Acceder",
         "register_button": "Registrar",
         "registration_error": "Error en el registro. Por favor, inténtelo de nuevo.",
+        "login_error": "Credenciales inválidas.",
         "logout": "Cerrar Sesión",
         "custom_tracker": "Rastreador de Consumo de Energía Personalizado",
         "weather": "Datos Meteorológicos en Tiempo Real",
@@ -163,16 +163,16 @@ else:
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # -------------------------------------------------
-# HOME PAGE: Welcome Animation
+# HOME PAGE: Welcome Animation using Lottie
 def show_home():
     st.title(tr("title"))
     st.write(tr("home_welcome"))
-    # Lottie animation example
     lottie_url = "https://assets7.lottiefiles.com/packages/lf20_jcikwtux.json"
     st_lottie(lottie_url, height=300)
 
 # -------------------------------------------------
-# USER AUTHENTICATION: Registration Only
+# USER AUTHENTICATION: Registration and (basic) Login
+# For demonstration, we will use firebase_admin to create a user.
 def show_registration():
     st.title(tr("login"))
     st.write("Please register to create an account.")
@@ -180,17 +180,40 @@ def show_registration():
     password = st.text_input(tr("password"), type="password", key="reg_password")
     if st.button(tr("register_button"), key="register_button"):
         try:
-            user = auth.create_user_with_email_and_password(email, password)
+            # Create a user with Firebase Admin
+            user = auth.create_user(email=email, password=password)
             st.session_state.logged_in = True
             st.session_state.user = user
+            st.session_state.stored_password = password  # For basic simulation of login
             st.success("Registration successful! You are now logged in.")
         except Exception as e:
             st.error(tr("registration_error"))
+            
+def show_login():
+    st.title("Login")
+    email = st.text_input("Email", key="login_email")
+    password = st.text_input("Password", type="password", key="login_password")
+    if st.button("Log In", key="login_button"):
+        try:
+            # Attempt to fetch the user by email
+            user = auth.get_user_by_email(email)
+            # For demonstration, compare with stored password
+            if st.session_state.get("stored_password") == password:
+                st.session_state.logged_in = True
+                st.session_state.user = user
+                st.success("Logged in successfully!")
+            else:
+                st.error(tr("login_error"))
+        except Exception as e:
+            st.error("User not found.")
 
 if not st.session_state.logged_in:
-    page = st.sidebar.radio("Go to", ["Register", "Settings"])
+    # Offer both registration and login
+    page = st.sidebar.radio("Go to", ["Register", "Login", "Settings"])
     if page == "Register":
         show_registration()
+    elif page == "Login":
+        show_login()
     elif page == "Settings":
         st.title(tr("settings"))
         lang = st.selectbox(tr("settings_language"), ["English", "Spanish"], index=["English", "Spanish"].index(st.session_state.language))
@@ -261,7 +284,7 @@ elif page == "Custom Tracker":
 elif page == "Real-Time Weather":
     st.title(tr("weather"))
     st.write("Enter a city name to get live weather data.")
-    default_api_key = "500c92f90ed8f4f84755b89b9e05e714"  # Replace with your actual API key
+    default_api_key = "YOUR_OPENWEATHER_API_KEY"  # Replace with your actual API key
     city_input = st.text_input(tr("weather_input"), "New York")
     def get_weather(city, api_key=default_api_key):
         base_url = "https://api.openweathermap.org/data/2.5/weather"
@@ -335,7 +358,7 @@ elif page == "Prediction":
     ]).reshape(1, -1)
     predicted_usage = model.predict(future_features)
     st.write(f"Predicted Energy Consumption at Hour {future_hour}: {predicted_usage[0]:.2f} kWh")
-    st.info("Note: This prediction is based on simulated data. For personalized results, please upload your historical energy data on the Manual Input page.")
+    st.info("Note: This prediction is based on simulated diurnal data. For personalized results, please upload your historical energy data on the Manual Input page.")
     future_hours = np.arange(24, 49)
     future_features_all = np.column_stack((
         future_hours,
@@ -454,13 +477,13 @@ elif page == "Manual Input":
         st.error("Invalid input. Please enter numbers separated by commas.")
 
 # -------------------------------------------------
-# PAGE: Chat Assistant (Simplified without OpenAI integration)
+# PAGE: Chat Assistant (Simplified)
 elif page == "Chat Assistant":
     st.title(tr("chat_assistant"))
     st.write("Ask for personalized energy-saving tips!")
     question = st.text_input(tr("chat_prompt"), "")
     if st.button(tr("chat_button")) and question:
-        # For now, we use a simplified, static response.
+        # Using a static response for now; you can integrate OpenAI later
         simulated_response = "Tip: Consider upgrading to LED lighting and installing a smart thermostat to optimize energy usage."
         st.write("Response:", simulated_response)
 
